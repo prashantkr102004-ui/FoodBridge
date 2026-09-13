@@ -1,0 +1,16 @@
+.env
+.env.local
+backend/.env
+frontend/.env
+frontend/.env.local
+.venv/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+.pytest_cache/
+**/.pytest_cache/
+*.db
+backend/uploads/
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
