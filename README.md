@@ -1,44 +1,105 @@
 # FoodBridge
-FoodBridge is a full-stack surplus food donation and distribution platform. It connects donors such as restaurants, college canteens, hotels, and event organizers with NGOs and volunteers who can collect and distribute edible surplus food.
+
+FoodBridge is a full-stack web application built to reduce food waste. The idea is simple: when a restaurant, college canteen, hotel, or event organizer has extra edible food, they can post it on FoodBridge. NGOs and volunteers can then find that food, accept it, collect it, and distribute it to people or groups who need it.
+
+This project was built as a complete college-style software project with authentication, role-based access, donation lifecycle tracking, location-based nearby search, smart recommendations, notifications, analytics, admin controls, tests, and deployment-ready configuration.
+
+## What FoodBridge Does
+
+FoodBridge connects three main sides of the system:
+
+- Donors who post surplus food.
+- NGOs and volunteers who accept and distribute food.
+- Admins who monitor users, donations, reports, and platform activity.
+
+The main donation flow is:
+
+```text
+AVAILABLE -> ACCEPTED -> COLLECTED -> DISTRIBUTED
+```
+
+There are also two terminal states:
+
+```text
+CANCELLED
+EXPIRED
+```
+
+Only properly allowed users can move a donation through the workflow. For example, a donor can create and cancel their own available donation, but only the NGO or volunteer who accepted it can mark it collected or distributed.
 
 ## Tech Stack
 
-- Frontend: React, Vite, React Router, Axios, Leaflet
-- Backend: Python, FastAPI, SQLAlchemy, Alembic
-- Database: PostgreSQL
-- Authentication: JWT with role-based authorization
+### Frontend
+
+- React
+- Vite
+- React Router
+- Axios
+- Leaflet and React-Leaflet for maps
+
+### Backend
+
+- Python
+- FastAPI
+- SQLAlchemy
+- Alembic
+- JWT authentication
+
+### Database
+
+- PostgreSQL
+
+SQLite is also used locally for easier development/testing in some setups, but PostgreSQL is the main intended database.
 
 ## User Roles
 
-- `DONOR`: creates and manages food donations.
-- `NGO`: finds, accepts, collects, and distributes food.
-- `VOLUNTEER`: works like an NGO receiver for pickup and distribution.
-- `ADMIN`: manages users, views platform data, analytics, and CSV reports.
+### DONOR
 
-Public registration allows only `DONOR`, `NGO`, and `VOLUNTEER`. Admin accounts must be created or promoted by a trusted database/admin setup step.
+Donors can register, login, create food donations, upload or click food photos, track donation status, receive notifications, and view their impact analytics.
+
+### NGO
+
+NGOs can register with organization details, find available food, use nearby search, view smart recommendations, accept donations, collect them, distribute them, and view receiver impact analytics.
+
+### VOLUNTEER
+
+Volunteers work like receiver users. They can accept, collect, and distribute food donations.
+
+### ADMIN
+
+Admins can view platform dashboards, manage users, inspect donations, view analytics, deactivate/reactivate users, and export CSV reports.
+
+Public registration does not allow ADMIN accounts. Admin setup must be done through a trusted database/admin setup step.
 
 ## Main Features
 
 - User registration and login
+- Public registration for donor, NGO, and volunteer users
+- Public ADMIN registration blocked
 - Secure password hashing
-- JWT authentication
-- Active/inactive account handling
-- Donation lifecycle: `AVAILABLE -> ACCEPTED -> COLLECTED -> DISTRIBUTED`
-- Terminal donation states: `CANCELLED`, `EXPIRED`
-- Donation creation, editing, cancellation, and expiry handling
-- Donation photo upload from device or camera
-- NGO/Volunteer acceptance with double-acceptance protection
-- Collection and distribution tracking
+- JWT-based authentication
+- Active/inactive user handling
+- Role-based backend authorization
+- Donor donation creation and editing
+- Donation cancellation and expiry handling
+- Food image upload from file or camera
+- NGO/accepter profile details and picture upload
+- Donation acceptance by NGO/volunteer
+- Double-acceptance prevention
+- Collection and distribution lifecycle
 - In-app notifications
-- User and pickup coordinates
+- Notification read/unread state
+- User and pickup location support
+- Browser geolocation with permission
 - Nearby food search using Haversine distance
-- Map display with OpenStreetMap/Leaflet
+- OpenStreetMap/Leaflet map display
 - Rule-based smart recommendations
 - Donor, receiver, and admin dashboards
 - Impact analytics
 - Admin CSV export
-- Security hardening and automated tests
-- Production-ready deployment configuration
+- Security documentation
+- Backend and frontend automated tests
+- Deployment-ready configuration
 
 ## Project Structure
 
@@ -46,6 +107,7 @@ Public registration allows only `DONOR`, `NGO`, and `VOLUNTEER`. Admin accounts 
 FoodBridge/
 ├── backend/
 │   ├── alembic/
+│   │   └── versions/
 │   ├── app/
 │   │   ├── models/
 │   │   ├── routes/
@@ -76,9 +138,13 @@ FoodBridge/
 └── render.yaml
 ```
 
-## Backend Setup on Windows
+## Local Setup on Windows
 
-Open PowerShell:
+The project has two parts, so run the backend and frontend in two separate terminals.
+
+## Backend Setup
+
+Open PowerShell and run:
 
 ```powershell
 cd "C:\Users\PK\Documents\CODING\food bridge\FoodBridge\backend"
@@ -88,19 +154,19 @@ pip install -r requirements.txt
 copy .env.example .env
 ```
 
-If PowerShell blocks virtual environment activation:
+If PowerShell blocks virtual environment activation, run:
 
 ```powershell
 Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 ```
 
-Create the PostgreSQL database:
+Create a PostgreSQL database:
 
 ```sql
 CREATE DATABASE foodbridge;
 ```
 
-Edit `backend\.env`:
+Open `backend\.env` and set your values:
 
 ```env
 DATABASE_URL=postgresql://username:password@localhost:5432/foodbridge
@@ -110,7 +176,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES=60
 BACKEND_CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000
 ```
 
-Run migrations:
+Run database migrations:
 
 ```powershell
 alembic upgrade head
@@ -122,22 +188,22 @@ Start the backend:
 uvicorn app.main:app --reload
 ```
 
-Swagger:
+Open Swagger API docs:
 
 ```text
 http://127.0.0.1:8000/docs
 ```
 
-Health checks:
+Useful backend check URLs:
 
 ```text
 http://127.0.0.1:8000/
 http://127.0.0.1:8000/health
 ```
 
-## Frontend Setup on Windows
+## Frontend Setup
 
-Open a second PowerShell window:
+Open another PowerShell window:
 
 ```powershell
 cd "C:\Users\PK\Documents\CODING\food bridge\FoodBridge\frontend"
@@ -146,53 +212,60 @@ copy .env.example .env
 npm run dev
 ```
 
-Edit `frontend\.env` if needed:
+Set the frontend API URL in `frontend\.env`:
 
 ```env
 VITE_API_BASE_URL=http://127.0.0.1:8000
 ```
 
-Open the frontend:
+Open the React app:
 
 ```text
 http://localhost:5173
 ```
 
-## Testing
+## How to Use the App
 
-Backend tests:
+### Donor Flow
 
-```powershell
-cd "C:\Users\PK\Documents\CODING\food bridge\FoodBridge\backend"
-.\.venv\Scripts\python.exe -m pytest
-```
+1. Register as a donor.
+2. Login.
+3. Create a food donation.
+4. Add pickup address and food details.
+5. Add a picture from device or click a picture using the camera.
+6. Track whether the donation is available, accepted, collected, or distributed.
+7. Check notifications and donor impact analytics.
 
-Frontend tests:
+### NGO / Accepter Flow
 
-```powershell
-cd "C:\Users\PK\Documents\CODING\food bridge\FoodBridge\frontend"
-npm test
-```
+1. Register as NGO/accepter.
+2. Enter NGO name, NGO type, address, contact details, and NGO picture.
+3. Login as NGO/accepter.
+4. Set location if needed.
+5. View available food.
+6. Use nearby food search.
+7. Open smart recommendations.
+8. Accept a donation.
+9. Mark it collected.
+10. Mark it distributed.
+11. Check receiver impact analytics.
 
-Frontend production build:
+### Admin Flow
 
-```powershell
-npm run build
-```
-
-Frontend dependency audit:
-
-```powershell
-npm audit
-```
+1. Login as admin.
+2. View admin dashboard.
+3. Manage users.
+4. View donations.
+5. Check platform analytics.
+6. Export CSV impact report.
 
 ## Important API Groups
 
 - Authentication: `/auth/register`, `/auth/login`, `/auth/me`
-- User location: `/users/me/location`
+- User profile/location: `/users/me/location`
 - Donations: `/donations`, `/donations/my`, `/donations/{id}`
-- Uploads: `/uploads/donation-image`
-- Lifecycle: `/donations/{id}/accept`, `/collect`, `/distribute`, `/cancel`
+- Uploads: `/uploads/donation-image`, `/uploads/receiver-image`
+- Lifecycle: `/donations/{id}/accept`, `/donations/{id}/collect`, `/donations/{id}/distribute`, `/donations/{id}/cancel`
 - Nearby food: `/donations/nearby`
 - Recommendations: `/recommendations/donations`
 - Notifications: `/notifications`
@@ -209,39 +282,61 @@ npm audit
 - Receiver: `/receiver`, `/receiver/available`, `/receiver/recommendations`, `/receiver/accepted`, `/receiver/impact`
 - Admin: `/admin`, `/admin/users`, `/admin/donations`, `/admin/analytics`
 
-## Manual Test Flow
+## Testing
 
-1. Register and login as a `DONOR`.
-2. Create a food donation with pickup address and an optional food picture.
-3. Register and login as an `NGO` or `VOLUNTEER`.
-4. Set receiver location in Profile.
-5. Open Available Food, Nearby Food, and Smart Recommendations.
-6. Accept the donation.
-7. Login again as the donor and check the notification.
-8. Login as the receiver and mark the donation collected.
-9. Mark the donation distributed.
-10. Login as donor and confirm lifecycle notifications and impact analytics.
-11. Login as admin and check users, donations, analytics, and CSV export.
+Run backend tests:
+
+```powershell
+cd "C:\Users\PK\Documents\CODING\food bridge\FoodBridge\backend"
+.\.venv\Scripts\python.exe -m pytest
+```
+
+Run frontend tests:
+
+```powershell
+cd "C:\Users\PK\Documents\CODING\food bridge\FoodBridge\frontend"
+npm test
+```
+
+Build the frontend for production:
+
+```powershell
+npm run build
+```
+
+Run frontend dependency audit:
+
+```powershell
+npm audit
+```
 
 ## Analytics Rules
 
-- Only `DISTRIBUTED` donations count as successfully rescued/completed food.
-- Quantity totals are grouped by unit. `KG`, `MEALS`, `PACKETS`, and `OTHER` are never added together.
-- Donor/admin success rate:
+FoodBridge does not invent impact numbers. Analytics are calculated from actual donation records.
+
+- A donation counts as successfully rescued/completed only when its status is `DISTRIBUTED`.
+- `KG`, `MEALS`, `PACKETS`, and `OTHER` are shown separately.
+- The app never adds different units together, because `10 KG + 20 MEALS` is not a meaningful single number.
+
+Donor and admin success rate:
 
 ```text
 distributed / (distributed + cancelled + expired) * 100
 ```
 
-- Receiver completion rate:
+Receiver completion rate:
 
 ```text
 distributed by this receiver / total accepted by this receiver * 100
 ```
 
-## Smart Recommendation Formula
+If there is no data yet, the app safely shows zero values instead of `NaN` or broken charts.
 
-FoodBridge uses a transparent rule-based score, not deep learning:
+## Smart Recommendations
+
+FoodBridge has a rule-based recommendation system. It is not deep learning and it does not call an external AI API.
+
+The final match score is:
 
 ```text
 final_score =
@@ -251,25 +346,57 @@ final_score =
   + preference_score * 0.15
 ```
 
-- Distance uses Haversine straight-line kilometers.
-- Urgency gives more weight to food expiring sooner.
-- Quantity is scored within its own unit type.
-- Preference uses receiver history only when enough history exists.
-- New receivers get a neutral preference score.
+In simple words:
 
-## Deployment
+- Closer donations get a better distance score.
+- Donations expiring sooner get a better urgency score.
+- Quantity is scored carefully within its own unit.
+- Food preference uses receiver history only when enough history exists.
+- New receivers are not punished. They get a neutral preference score.
 
-Recommended simple deployment:
+The score is only a ranking score. It is not a scientific probability.
+
+## Location and Maps
+
+FoodBridge uses latitude and longitude for nearby matching.
+
+- Distance is calculated using the Haversine formula.
+- This gives approximate straight-line distance in kilometers.
+- It is not driving distance.
+- Browser geolocation asks for permission.
+- The app does not track users continuously.
+- Donation maps use OpenStreetMap with Leaflet.
+
+## Notifications
+
+FoodBridge uses in-app notifications only.
+
+Examples:
+
+- Donor is notified when a donation is accepted.
+- Donor is notified when food is collected.
+- Donor is notified when food is distributed.
+- Users can mark notifications as read.
+
+This project does not include email, SMS, WhatsApp, push notifications, or WebSockets.
+
+## Admin Account Setup
+
+Public registration blocks `ADMIN` accounts. For a local demo, create a normal trusted user first and then promote that user in the database:
+
+```sql
+UPDATE users SET role = 'ADMIN' WHERE email = 'admin@example.com';
+```
+
+This keeps the public registration page safe.
+
+## Deployment Notes
+
+Simple deployment setup:
 
 - Backend: Render Web Service
 - Database: Render PostgreSQL
 - Frontend: Vercel
-
-Backend deployment file:
-
-```text
-render.yaml
-```
 
 Backend build command:
 
@@ -293,7 +420,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES=60
 BACKEND_CORS_ORIGINS=https://your-vercel-app.vercel.app
 ```
 
-The backend supports both `postgres://...` and `postgresql://...` hosted database URLs.
+The backend supports both `postgres://...` and `postgresql://...` database URLs.
 
 Generate a strong secret:
 
@@ -301,13 +428,7 @@ Generate a strong secret:
 python -c "import secrets; print(secrets.token_urlsafe(48))"
 ```
 
-Frontend deployment file:
-
-```text
-frontend/vercel.json
-```
-
-Vercel settings:
+Frontend deployment settings for Vercel:
 
 ```text
 Root Directory: frontend
@@ -321,31 +442,36 @@ Frontend production environment variable:
 VITE_API_BASE_URL=https://your-render-backend.onrender.com
 ```
 
-Use HTTPS URLs in production and set `BACKEND_CORS_ORIGINS` to the exact deployed frontend URL.
+Use HTTPS URLs in production. Set `BACKEND_CORS_ORIGINS` to the exact deployed frontend URL.
 
-## Admin Account Setup
+## Security Summary
 
-Public registration blocks `ADMIN`. For local demo setup:
+More details are in `SECURITY.md`.
 
-1. Register a normal trusted user.
-2. Promote that user in PostgreSQL:
-
-```sql
-UPDATE users SET role = 'ADMIN' WHERE email = 'admin@example.com';
-```
-
-## Security Notes
-
-See `SECURITY.md` for security details. In short:
+Short version:
 
 - Passwords are hashed.
 - JWT secrets come from environment variables.
-- Protected routes are enforced by the backend.
-- Users cannot access other users' private notifications or analytics.
-- Donation workflow transitions are controlled by service logic.
-- CSV export avoids password/token fields and sanitizes formula-like values.
-- Browser geolocation is permission-based and not continuous tracking.
+- Backend routes enforce role permissions.
+- Users cannot read other users' private notifications or analytics.
+- Donation status changes are controlled through workflow endpoints.
+- CSV export avoids password/token fields and protects against spreadsheet formula injection.
+- Geolocation is permission-based and not continuous tracking.
 
-## Scope Not Included
+## Not Included
 
-FoodBridge does not include payment, QR/OTP, SMS/WhatsApp, email notifications, WebSockets, live GPS tracking, ratings, image recognition, demand prediction, or deep-learning AI.
+These items are intentionally outside the current project scope:
+
+- Payments
+- QR or OTP pickup verification
+- SMS, WhatsApp, or email notifications
+- WebSockets
+- Live GPS tracking
+- Ratings and reviews
+- Food image recognition
+- Demand prediction
+- Deep-learning AI
+
+## Project Status
+
+FoodBridge is technically complete as a full-stack college project. It has a working backend, frontend, database migrations, tests, authentication, role-based workflows, maps, recommendations, notifications, analytics, and deployment-ready setup.
