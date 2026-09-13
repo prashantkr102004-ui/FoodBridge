@@ -1,5 +1,4 @@
 # FoodBridge
-
 FoodBridge is a full-stack surplus food donation and distribution platform. It connects donors such as restaurants, college canteens, hotels, and event organizers with NGOs and volunteers who can collect and distribute edible surplus food.
 
 ## Tech Stack
